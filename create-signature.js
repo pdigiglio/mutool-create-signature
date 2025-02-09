@@ -57,30 +57,15 @@ function usage() {
  * @returns The string representation of the args.
  */
 function argsToString(args) {
-    var str = "";
-
-    //var k_ = Object.keys(args);
-
-    var keys = [ "input", "output", "signatureName", "cert", "pass", "where", "img", "help" ]
-    for (var k = 0; k != keys.length; ++k) {
-        var key = keys[k];
-        var val = args[key];
-        var sep = (k != 0) ? ", " : "{ ";
-
-        if (val) {
-            val = key == "pass" ? "***" : val;
-            str += sep + key + ": '" + val + "\'";
+    var replacer = function(key, val) {
+        if (key == "pass") {
+            val = "***";
         }
-        else {
-            str += sep + key + ": null";
-        }
-    }
 
-    if (str.length == 0) {
-        str = "{";
-    }
+        return val;
+    };
 
-    return str + " }";
+    return JSON.stringify(args, replacer, 2);
 }
 
 /**
