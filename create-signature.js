@@ -3,7 +3,7 @@
  *
  * This file is meant to be run by `mutool` as:
  *
- * mutool run crete-signature.js <args...>
+ * mutool run create-signature.js <args...>
  *
  */
 
@@ -384,6 +384,12 @@ function validateArgs(args) {
     return validation;
 }
 
+/**
+ * Parse the position where to put the signature from the "where" field in the arguments.
+ *
+ * @param args - The program parsed args.
+ * @returns The signature position with a parsing status.
+ */
 function parseSignaturePos(args) {
     var res = {
         status: { ok: false, errorMsg: "" },
@@ -432,7 +438,7 @@ function parseSignaturePos(args) {
 function parseDocumentPage(page, signatureRect, args) {
     var tl = signatureRect.topLeft;
     var br = signatureRect.bottomRight;
-    console.log("Signing in rectangle: " + tl + ", "+ br);
+    console.log("Signing in rectangle: " + tl + ", " + br);
 
     var signature = page.createSignature(args.signatureName);
     signature.setRect([tl.x, tl.y, br.x, br.y]);
@@ -450,6 +456,10 @@ function parseDocumentPage(page, signatureRect, args) {
     signature.update();
 }
 
+/**
+ * Sign the document.
+ * @param {Object} args - The parsed cmd-line args.
+ */
 function signDocument(args) {
     // Parse the position where to place the signature.
     var signaturePos = parseSignaturePos(args);
@@ -482,9 +492,7 @@ function main(programArgs) {
         return 0;
     }
 
-    //console.log("Adding signature");
     console.log("Params: " + args);
-
     var validation = validateArgs(args);
     if (!validation.ok) {
         console.error(validation.errorMsg);
