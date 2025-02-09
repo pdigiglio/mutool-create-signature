@@ -408,6 +408,34 @@ function parseSignaturePos(args) {
     return res;
 }
 
+/**
+ * Sign a document page.
+ *
+ * @param {PDFPage} page - The document page.
+ * @param {Object} signatureRect - The rectangle for the signature.
+ * @param {Object} args - The cmd-line args.
+ */
+function parseDocumentPage(page, signatureRect, args) {
+    var tl = signatureRect.topLeft;
+    var br = signatureRect.bottomRight;
+    console.log("Signing in rectangle: " + JSON.stringify(tl) + ", "+ JSON.stringify(br));
+
+    var signature = page.createSignature(args.signatureName);
+    signature.setRect([tl.x, tl.y, br.x, br.y]);
+
+    var signer = new PDFPKCS7Signer(args.cert, args.pass);
+    var image = null;
+    if (args.img) {
+        var imageBuf = new mupdf.readFile(args.img);
+        image = new mupdf.Image(imageBuf);
+    }
+
+    var reason = "";
+    var location = "";
+    signature.sign(signer, args.signatureConfig, image, reason, location);
+    signature.update();
+}
+
 function signDocument(args) {
     // Parse the position where to place the signature.
     var signaturePos = parseSignaturePos(args);
@@ -423,28 +451,10 @@ function signDocument(args) {
         return { ok: false, errorMsg: errorMsg_ };
     }
 
+    console.log("Signing page " + (pageIdx + 1) + " (index " + pageIdx + ") of " + pageCount);
     var page = doc.loadPage(pageIdx);
     var rect = signaturePos.rect;
-    var signature = page.createSignature(args.signatureName);
-
-    var tl = rect.topLeft;
-    var br = rect.bottomRight;
-    signature.setRect([tl.x, tl.y, br.x, br.y]);
-
-    console.log("Signing page " + pageIdx + " from " + JSON.stringify(tl) + " to "+ JSON.stringify(br));
-
-    var signer = new PDFPKCS7Signer(args.cert, args.pass);
-
-    var image = null;
-    if (args.img) {
-        var imageBuf = new mupdf.readFile(args.img);
-        image = new mupdf.Image(imageBuf);
-    }
-
-    var reason = "";
-    var location = "";
-    signature.sign(signer, args.signatureConfig, image, reason, location);
-    signature.update();
+    parseDocumentPage(page, signaturePos.rect, args);
 
     doc.save(args.output, "");
     return { ok : true };
