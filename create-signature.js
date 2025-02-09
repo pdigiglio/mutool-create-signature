@@ -155,7 +155,7 @@ var pdfFiletype = "application/pdf";
  * Return the program usage as a string.
  * @returns The program help.
  */
-function usage() {
+function getUsage() {
     return ""
         + "USAGE:\n"
         + "  mutool run create-signature.js <options...>\n"
@@ -463,8 +463,8 @@ function signDocument(args) {
 function main(programArgs) {
     var args = parseArgs(programArgs);
     if (args.help) {
-        var usage_ = usage();
-        console.log(usage_);
+        var usage = getUsage();
+        console.log(usage);
         return 0;
     }
 
