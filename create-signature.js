@@ -116,7 +116,6 @@ var defaultArgs = {
      * Stringify the parsed cmd-line args, making sure not to expose the password
      * in plain text.
      *
-     * @param args - The parsed cmd-line args.
      * @returns The string representation of the args.
      */
     toString: function() {
@@ -168,18 +167,42 @@ function usage() {
 }
 
 /**
- * Stringify the parsed cmd-line args, making sure not to expose the password
- * in plain text.
+ * Check if an index is within the bounds of an array.
  *
- * @param args - The parsed cmd-line args.
- * @returns The string representation of the args.
+ * @param {Array} array - The array to check against.
+ * @param {number} array - The index to check.
+ *
+ * @returns `true`, if the index is within the bounds; `false`, otherwise.
  */
-function argsToString(args) {
-    var replacer = function(key, val) {
-        return key == "pass" ? "***" : val;
-    };
+function idxInRange(array, idx) {
+    return 0 <= idx && idx < array.length;
+}
+    
+/**
+ * Parse a long option from a command line. The option expects an argument.
+ */
+function parseCmdLongOption(cmdLineArgs, longOption) {
+    var kv = null;
 
-    return JSON.stringify(args, replacer, 2);
+    var i = cmdLineArgs.lastIndexOf("--" + longOption);
+    if (idxInRange(cmdLineArgs, i) && idxInRange(cmdLineArgs, i + 1)) {
+        kv = {}; // Create object
+        kv[longOption] = cmdLineArgs[i + 1];
+    }
+
+    return kv;
+}
+
+function parseCmdLongFlag(cmdLineArgs, longFlag) {
+    var kv = null;
+
+    var i = cmdLineArgs.lastIndexOf("--" + longFlag);
+    if (idxInRange(cmdLineArgs, i)) {
+        kv = {}; // Create object
+        kv[longFlag] = true;
+    }
+
+    return kv;
 }
 
 /**
@@ -189,36 +212,36 @@ function argsToString(args) {
  * @returns A JSON object with the parsed cmd line.
  */
 function parseArgs(args) {
-    var parsedArgs = {
-        signatureName: "signature",
-        where: "0,0,0,100,200",
-        output: "output.pdf",
-        help: false,
-        toString:  function() { return argsToString(this); }
-    };
+    var parsedArgs = defaultArgs.clone();
 
-    var inArgsBound = function(idx) { return 0 <= idx && idx < args.length; };
-    var parseArg = function(args, field) {
-        var i = args.lastIndexOf("--" + field);
-        if (inArgsBound(i) && inArgsBound(i + 1)) {
-            parsedArgs[field] = args[i + 1];
+    parsedArgs.mergeWith(parseCmdLongFlag(args, "help"));
+    if (parsedArgs.help != null && parsedArgs.help)
+        return parsedArgs; // No need to parse further.
+
+    var cfg = parseCmdLongOption(args, "config");
+    if (cfg != null) {
+        // TODO: parse json
+        var cfgPath = cfg.config;
+        try {
+            var buf = mupdf.readFile(cfgPath);
+            var bufContent = buf.asString();
+            var parsedCfg = JSON.parse(bufContent);
+            parsedArgs.mergeWith(parsedCfg);
         }
+        catch (e) {
+            print(e);
+        }
+
+        parsedArgs.mergeWith(cfg);
     }
 
-    var parseFlag = function(args, field) {
-        var i = args.lastIndexOf("--" + field);
-        if (inArgsBound(i)) {
-            parsedArgs[field] = true;
-        }
-    }
-
-    parseFlag(args, "help");
-    parseArg(args, "input");
-    parseArg(args, "output");
-    parseArg(args, "cert");
-    parseArg(args, "pass");
-    parseArg(args, "where");
-    parseArg(args, "img");
+    parsedArgs.mergeWith(parseCmdLongOption(args, "input"));
+    parsedArgs.mergeWith(parseCmdLongOption(args, "input"));
+    parsedArgs.mergeWith(parseCmdLongOption(args, "output"));
+    parsedArgs.mergeWith(parseCmdLongOption(args, "cert"));
+    parsedArgs.mergeWith(parseCmdLongOption(args, "pass"));
+    parsedArgs.mergeWith(parseCmdLongOption(args, "where"));
+    parsedArgs.mergeWith(parseCmdLongOption(args, "img"));
 
     return parsedArgs;
 }
