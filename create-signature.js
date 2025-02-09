@@ -425,8 +425,13 @@ function signDocument(args) {
     console.log("Signing page " + pageIdx + " from " + JSON.stringify(tl) + " to "+ JSON.stringify(br));
 
     var signer = new PDFPKCS7Signer(args.cert, args.pass);
-    var imageBuf = new mupdf.readFile(args.img);
-    var image = new mupdf.Image(imageBuf);
+
+    var image = null;
+    if (args.img) {
+        var imageBuf = new mupdf.readFile(args.img);
+        image = new mupdf.Image(imageBuf);
+    }
+
     var reason = "";
     var location = "";
     signature.sign(signer, args.signatureConfig, image, reason, location);
