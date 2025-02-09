@@ -9,7 +9,7 @@ You have to run `create-signature.js` via
 [`mutool run`](https://mupdf.readthedocs.io/en/latest/mutool-run.html), e.g.:
 
 ```sh
-mutool run create-signature --help
+mutool run create-signature.js --help
 ```
 
 
@@ -23,12 +23,15 @@ default settings will be used.
 If you have a set of options you use often, you may store them in a JSON file.
 You can then pass its path to `create-signature.js` via the `--config <path>`
 command-line option. The settings you define in the JSON file will override the
-default one.
+default ones.
 
-Finally, you may override any setting with a command-line argument.
-Command-line arguments take precedence over any setting.
+Finally, you may override any setting with a command-line argument. Cmd-line
+arguments take precedence over any setting. To see a list of options, use
+`--help`.
 
-As an example, suppose you have the following `cfg.json` file:
+#### Example
+
+Suppose you have the following `cfg.json` file:
 
 ```json
 {
@@ -45,16 +48,17 @@ Then:
 mutool run create-signature --config cfg.json --output output_from_cmd_line.pdf
 ```
 
-Will have:
+Will use the following settings:
 
- * `output` be `output_from_cmd_line.pdf` (from the command line, even though
- it's also set in `cfg.json`);
+ * `output: output_from_cmd_line.pdf` (from the command line, even though it's
+ also set in `cfg.json`);
 
- * `signatureConfig.showLabels` be `true` (from `cfg.json`);
+ * `signatureConfig.showLabels: true` (from `cfg.json`);
 
  * Any other setting will have its default value (if any).
 
 
 ### Known limitations
 
- * The paths in `config.json` must be absolute and no shell expansion will be performed.
+ * The paths in the JSON configuration  must be absolute and no shell expansion
+ will be performed.
