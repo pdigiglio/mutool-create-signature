@@ -44,6 +44,16 @@ function mergeObjects(target, source) {
 }
 
 /**
+ * Stringify a point.
+ *
+ * @param point - The point to stringify.
+ * @returns The string representation of the point.
+ */
+function pointToString(point) {
+    return "{x: " + point.x + ", y: " + point.y + "}";
+}
+
+/**
  * The default application arguments.
  *
  * If not provided on the cmd-line, the default options will be taken from this
@@ -393,11 +403,13 @@ function parseSignaturePos(args) {
         res.rect = {
             topLeft: {
                 x: parseFloat(tokens[1]),
-                y: parseFloat(tokens[2])
+                y: parseFloat(tokens[2]),
+                toString: function() { return pointToString(this); }
             },
             bottomRight: {
                 x: parseFloat(tokens[3]),
-                y: parseFloat(tokens[4])
+                y: parseFloat(tokens[4]),
+                toString: function() { return pointToString(this); }
             }
         };
 
@@ -420,7 +432,7 @@ function parseSignaturePos(args) {
 function parseDocumentPage(page, signatureRect, args) {
     var tl = signatureRect.topLeft;
     var br = signatureRect.bottomRight;
-    console.log("Signing in rectangle: " + JSON.stringify(tl) + ", "+ JSON.stringify(br));
+    console.log("Signing in rectangle: " + tl + ", "+ br);
 
     var signature = page.createSignature(args.signatureName);
     signature.setRect([tl.x, tl.y, br.x, br.y]);
