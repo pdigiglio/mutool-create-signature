@@ -1,0 +1,5 @@
+# Ignore my test configuration.
+config.json
+
+# Ignore any generated PDF file.
+*.pdf
