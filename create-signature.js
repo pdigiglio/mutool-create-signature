@@ -251,12 +251,16 @@ function parseJsonFromFile(filePath) {
  * @returns A JSON object with the parsed cmd line.
  */
 function parseArgs(args) {
+    // 1. Start from default args.
     var parsedArgs = defaultArgs.clone();
 
+    // Exception: parse "help" from the cmd line upfront so that I can skip
+    // quite some work if an help message is requested.
     parsedArgs.mergeWith(parseCmdLongFlag(args, "help"));
     if (parsedArgs.help != null && parsedArgs.help)
         return parsedArgs; // No need to parse further.
 
+    // 2. Read config file, if any.
     var cfg = parseCmdLongOption(args, "config");
     if (cfg != null) {
         parsedArgs.mergeWith(cfg);
@@ -266,11 +270,12 @@ function parseArgs(args) {
             parsedArgs.mergeWith(parsedJson.json);
         }
         else {
+            // Ignore this error and continue.
             console.log(parsedJson.errorMsg);
         }
     }
 
-    parsedArgs.mergeWith(parseCmdLongOption(args, "input"));
+    // 3. Parse cmd line.
     parsedArgs.mergeWith(parseCmdLongOption(args, "input"));
     parsedArgs.mergeWith(parseCmdLongOption(args, "output"));
     parsedArgs.mergeWith(parseCmdLongOption(args, "cert"));
