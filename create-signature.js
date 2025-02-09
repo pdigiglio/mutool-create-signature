@@ -156,12 +156,21 @@ var pdfFiletype = "application/pdf";
  * @returns The program help.
  */
 function usage() {
-    return "Usage:\n"
+    return ""
+        + "USAGE:\n"
+        + "  mutool run create-signature.js <options...>\n"
+        + "\n"
+        + "OPTIONS:\n"
+        + "If an option is marked as \"optional\" or has a default value,\n"
+        + "it may be omitted.\n"
+        + "\n"
         + "  --input <file>   The input file\n"
-        + "  --output <file>  The output file (default: <>)\n"
+        + "  --output <file>  The output file\n"
+        + "                   (default: '" + defaultArgs.output + "')\n"
         + "  --cert <file>    The signature file\n"
-        + "  --pass <pass>    The signature password\n"
+        + "  --pass <pass>    The password to unlock the signature\n"
         + "  --where <pos>    The signature position in the document\n"
+        + "                   (default: '" + defaultArgs.where + "')\n"
         + "  --img <file>     The signature image (optional)\n"
         + "  --help           Show this help";
 }
