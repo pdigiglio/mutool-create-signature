@@ -322,24 +322,22 @@ function validateArgs(args) {
     var validation = { ok : true, errorMsg : "" };
 
     var validateFileExists = function(args, fileDesc) {
-        var v = { ok : true, errorMsg : "" };
-
         var file = args[fileDesc];
-        v.ok = file != null;
+
+        var v = { ok : file != null, errorMsg : "" };
         if (!v.ok) {
             v.errorMsg = fileDesc + ": missing argument";
             return v;
         }
 
         v.ok = fileExists(file);
-        if (!v.ok) {
+        if (!v.ok) 
             v.errorMsg = fileDesc + ": " + file + " : No such file";
-            return v;
-        }
 
         return v;
     };
 
+    // Check input exists and is PDF.
     var validation = validateFileExists(args, "input");
     if (!validation.ok)
         return validation;
@@ -350,9 +348,17 @@ function validateArgs(args) {
         return validation;
     }
 
-    var validation = validateFileExists(args, "cert");
+    // Check certificate exists.
+    validation = validateFileExists(args, "cert");
     if (!validation.ok)
         return validation;
+
+    // If an image is given, check it exists.
+    if (args.img != null) {
+        validation = validateFileExists(args, "img");
+        if (!validation.ok)
+            return validation;
+    }
 
     return validation;
 }
