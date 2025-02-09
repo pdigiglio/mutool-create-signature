@@ -33,6 +33,11 @@ var signatureConfig = {
  */
 var pdfFiletype = "application/pdf";
 
+
+/**
+ * Return the program usage as a string.
+ * @returns The program help.
+ */
 function usage() {
     return "Usage:\n"
         + "  --input <file>   The input file\n"
@@ -48,7 +53,7 @@ function usage() {
  * Stringify the parsed cmd-line args, making sure not to expose the password
  * in plain text.
  *
- * @param args = The parsed cmd-line args.
+ * @param args - The parsed cmd-line args.
  * @returns The string representation of the args.
  */
 function argsToString(args) {
