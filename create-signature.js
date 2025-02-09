@@ -235,6 +235,7 @@ function parseJsonFromFile(filePath) {
         var buf = mupdf.readFile(filePath);
         var bufContent = buf.asString();
         json.json = JSON.parse(bufContent);
+        json.ok = true;
     }
     catch (e) {
         json.errorMsg = "Could not parse '" + filePath + "' as JSON";
