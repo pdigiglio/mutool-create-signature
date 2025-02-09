@@ -58,11 +58,7 @@ function usage() {
  */
 function argsToString(args) {
     var replacer = function(key, val) {
-        if (key == "pass") {
-            val = "***";
-        }
-
-        return val;
+        return key == "pass" ? "***" : val;
     };
 
     return JSON.stringify(args, replacer, 2);
