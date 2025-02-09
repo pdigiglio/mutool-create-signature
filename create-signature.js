@@ -427,6 +427,11 @@ function signDocument(args) {
 
 function main(programArgs) {
     var args = parseArgs(programArgs);
+    if (args.help) {
+        var usage_ = usage();
+        console.log(usage_);
+        return 0;
+    }
 
     //console.log("Adding signature");
     console.log("Params: " + args);
@@ -437,11 +442,6 @@ function main(programArgs) {
         return 1;
     }
 
-    if (args.help) {
-        var usage_ = usage();
-        console.log(usage_);
-        return 0;
-    }
 
     var sign = signDocument(args);
     if (!sign.ok) {
