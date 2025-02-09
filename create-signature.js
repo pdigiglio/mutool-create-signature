@@ -164,6 +164,8 @@ function getUsage() {
         + "If an option is marked as \"optional\" or has a default value,\n"
         + "it may be omitted.\n"
         + "\n"
+        + "  --config <file>  The JSON config file. Further cmd-line args\n"
+        + "                   will override settings in this file\n"
         + "  --input <file>   The input file\n"
         + "  --output <file>  The output file\n"
         + "                   (default: '" + defaultArgs.output + "')\n"
