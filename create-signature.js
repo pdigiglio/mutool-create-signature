@@ -7,22 +7,6 @@
  *
  */
 
-
-/**
- * Stringify the parsed cmd-line args, making sure not to expose the password
- * in plain text.
- *
- * @param args - The parsed cmd-line args.
- * @returns The string representation of the args.
- */
-function argsToString(args) {
-    var replacer = function(key, val) {
-        return key == "pass" ? "***" : val;
-    };
-
-    return JSON.stringify(args, replacer, 2);
-}
-
 /**
  * Merge data from `source` object into `target`, similar to `Object.assign()`.
  * If properties in `source` are objects, they are merged recursively.
@@ -60,36 +44,96 @@ function mergeObjects(target, source) {
 }
 
 /**
- * The default application arguments. If not provided on the cmd-line, the
- * default options will be taken from this object.
+ * The default application arguments.
+ *
+ * If not provided on the cmd-line, the default options will be taken from this
+ * object.
  */
 var defaultArgs = {
+    /**
+     * The name of the signature.
+     */
     signatureName: "signature",
+
+    /**
+     * The position of the signature.
+     *
+     * This field must have 5 comma-separated numbers:
+     *  - The first integer is a 0-based page number.
+     *  - The other four float fields are the top left and bottom right points
+     *  of the rectangle.
+     */
     where: "0,0,0,100,200",
+
+    /**
+     * The ouput file.
+     */
     output: "output.pdf",
+
+    /**
+     * Whether to print the help string.
+     */
     help: false,
+
+    /**
+     * The signature configuration. See:
+     * https://mupdf.readthedocs.io/en/latest/mutool-run-js-api.html#signature-configuration-object
+     */
     signatureConfig: {
-        // Whether to include both labels and values or just values on the right
-        // hand side.
+        /**
+         * Whether to include both labels and values or just values on the
+         * right hand side.
+         */
         showLabels : false,
 
-        // Whether to include the distinguished name on the right hand side.
+        /**
+         * Whether to include the distinguished name on the right hand side.
+         */
         showDN : false,
 
-        // Whether to include the name of the signatory on the right hand side.
+        /**
+         * Whether to include the name of the signatory on the right hand side.
+         */
         showTextName : false,
 
-        // Whether to include the date of signing on the right hand side.
+        /**
+         * Whether to include the date of signing on the right hand side.
+         */
         showDate : false,
 
-        // Whether to include the signatory name on the left hand side.
+        /**
+         * Whether to include the signatory name on the left hand side.
+         */
         showGraphicName : false,
 
-        // Whether to include the MuPDF logo in the background.
+        /**
+         * Whether to include the MuPDF logo in the background.
+         */
         showLogo : false,
     },
-    toString:  function() { return argsToString(this); },
-    mergeWith: function(other) { return mergeObjects(this, other); },
+
+    /**
+     * Stringify the parsed cmd-line args, making sure not to expose the password
+     * in plain text.
+     *
+     * @param args - The parsed cmd-line args.
+     * @returns The string representation of the args.
+     */
+    toString: function() {
+        var replacer = function(key, val) {
+            return key == "pass" ? "***" : val;
+        };
+
+        return JSON.stringify(this, replacer, 2);
+    },
+
+    mergeWith: function(other) {
+        return mergeObjects(this, other);
+    },
+
+    /** 
+     * Deep clone this object.
+     */
     clone: function() {
         // Copy data.
         var cp = JSON.parse(JSON.stringify(this));
