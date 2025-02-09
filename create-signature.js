@@ -179,7 +179,14 @@ function idxInRange(array, idx) {
 }
     
 /**
- * Parse a long option from a command line. The option expects an argument.
+ * Parse a long option (e.g. "--input") from a command line. Long options
+ * expect an argument.
+ *
+ * @param {Array} cmdLineArgs - The tokenized cmd-line arguments.
+ * @param {String} longOption - The option name.
+ *
+ * @returns An object like `{ longOption: val }`, if `val` could be parsed;
+ * `null`, otherwise.
  */
 function parseCmdLongOption(cmdLineArgs, longOption) {
     var kv = null;
@@ -193,6 +200,16 @@ function parseCmdLongOption(cmdLineArgs, longOption) {
     return kv;
 }
 
+/**
+ * Parse a long flag (e.g. "--help") from a command line. Flags expect no
+ * argument.
+ *
+ * @param {Array} cmdLineArgs - The tokenized cmd-line arguments.
+ * @param {String} longFlag - The flag name.
+ *
+ * @returns An object like `{ longFlag: true }`, if the flag is in the command
+ * line; `null`, otherwise.
+ */
 function parseCmdLongFlag(cmdLineArgs, longFlag) {
     var kv = null;
 
@@ -206,9 +223,30 @@ function parseCmdLongFlag(cmdLineArgs, longFlag) {
 }
 
 /**
+ * Read an input file and parse it as JSON.
+ *
+ * @param {String} filePath - The path to the file to open.
+ * @returns An object with a boolean, an error message and the parsed JSON (if any).
+ */
+function parseJsonFromFile(filePath) {
+    var json = { ok: false, errorMsg: "" };
+
+    try {
+        var buf = mupdf.readFile(filePath);
+        var bufContent = buf.asString();
+        json.json = JSON.parse(bufContent);
+    }
+    catch (e) {
+        json.errorMsg = "Could not parse '" + filePath + "' as JSON";
+    }
+
+    return json;
+}
+
+/**
  * Parse cmd-line args to a JSON object.
  *
- * @param args - The command line arguments.
+ * @param {Array} args - The tokenized command line arguments.
  * @returns A JSON object with the parsed cmd line.
  */
 function parseArgs(args) {
@@ -220,19 +258,15 @@ function parseArgs(args) {
 
     var cfg = parseCmdLongOption(args, "config");
     if (cfg != null) {
-        // TODO: parse json
-        var cfgPath = cfg.config;
-        try {
-            var buf = mupdf.readFile(cfgPath);
-            var bufContent = buf.asString();
-            var parsedCfg = JSON.parse(bufContent);
-            parsedArgs.mergeWith(parsedCfg);
-        }
-        catch (e) {
-            print(e);
-        }
-
         parsedArgs.mergeWith(cfg);
+
+        var parsedJson = parseJsonFromFile(cfg.config);
+        if (parsedJson.ok) {
+            parsedArgs.mergeWith(parsedJson.json);
+        }
+        else {
+            console.log(parsedJson.errorMsg);
+        }
     }
 
     parsedArgs.mergeWith(parseCmdLongOption(args, "input"));
