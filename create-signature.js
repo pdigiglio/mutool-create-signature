@@ -7,32 +7,106 @@
  *
  */
 
-var signatureConfig = {
-    // Whether to include both labels and values or just values on the right
-    // hand side.
-    showLabels : false,
 
-    // Whether to include the distinguished name on the right hand side.
-    showDN : false,
-    
-    // Whether to include the name of the signatory on the right hand side.
-    showTextName : false,
-    
-    // Whether to include the date of signing on the right hand side.
-    showDate : false,
-    
-    // Whether to include the signatory name on the left hand side.
-    showGraphicName : false,
-    
-    // Whether to include the MuPDF logo in the background.
-    showLogo : false,
+/**
+ * Stringify the parsed cmd-line args, making sure not to expose the password
+ * in plain text.
+ *
+ * @param args - The parsed cmd-line args.
+ * @returns The string representation of the args.
+ */
+function argsToString(args) {
+    var replacer = function(key, val) {
+        return key == "pass" ? "***" : val;
+    };
+
+    return JSON.stringify(args, replacer, 2);
+}
+
+/**
+ * Merge data from `source` object into `target`, similar to `Object.assign()`.
+ * If properties in `source` are objects, they are merged recursively.
+ *
+ * @param target - The target object (gets modified).
+ * @param source - The souece object (not modified).
+ * @returns The target object.
+ */
+function mergeObjects(target, source) {
+    if (target == null)
+        return source;
+
+    if (source == null)
+        return target;
+
+    var sourceKeys = Object.keys(source);
+    for (var i = 0; i < sourceKeys.length; ++i) {
+        var key = sourceKeys[i];
+        var sourceValue = source[key];
+
+        if (sourceValue instanceof Object) {
+            if (!(target[key] instanceof Object)) {
+                // Initialize an empty object if needed
+                target[key] = {};
+            }
+
+            // Recursively merge nested objects
+            mergeObjects(target[key], sourceValue);
+        } else {
+            target[key] = sourceValue;
+        }
+    }
+
+    return target;
+}
+
+/**
+ * The default application arguments. If not provided on the cmd-line, the
+ * default options will be taken from this object.
+ */
+var defaultArgs = {
+    signatureName: "signature",
+    where: "0,0,0,100,200",
+    output: "output.pdf",
+    help: false,
+    signatureConfig: {
+        // Whether to include both labels and values or just values on the right
+        // hand side.
+        showLabels : false,
+
+        // Whether to include the distinguished name on the right hand side.
+        showDN : false,
+
+        // Whether to include the name of the signatory on the right hand side.
+        showTextName : false,
+
+        // Whether to include the date of signing on the right hand side.
+        showDate : false,
+
+        // Whether to include the signatory name on the left hand side.
+        showGraphicName : false,
+
+        // Whether to include the MuPDF logo in the background.
+        showLogo : false,
+    },
+    toString:  function() { return argsToString(this); },
+    mergeWith: function(other) { return mergeObjects(this, other); },
+    clone: function() {
+        // Copy data.
+        var cp = JSON.parse(JSON.stringify(this));
+
+        // Copy member functions.
+        cp.toString = this.toString;
+        cp.clone = this.clone;
+        cp.mergeWith = this.mergeWith;
+
+        return cp;
+    },
 };
 
 /**
  * The MIME type of a PDF file.
  */
 var pdfFiletype = "application/pdf";
-
 
 /**
  * Return the program usage as a string.
@@ -242,7 +316,7 @@ function signDocument(args) {
     var image = new mupdf.Image(imageBuf);
     var reason = "";
     var location = "";
-    signature.sign(signer, signatureConfig, image, reason, location);
+    signature.sign(signer, args.signatureConfig, image, reason, location);
     signature.update();
 
     doc.save(args.output, "");
